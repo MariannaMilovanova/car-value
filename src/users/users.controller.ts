@@ -3,52 +3,51 @@ import {
   Controller,
   Post,
   Get,
-  Param,
   Patch,
   Delete,
+  Param,
   Query,
   NotFoundException,
+  UseInterceptors,
+  ClassSerializerInterceptor,
 } from '@nestjs/common';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import { UsersService } from './users.service';
+import { SerializeInterceptor } from '../interceptors/serialize.interceptor';
 
 @Controller('auth')
 export class UsersController {
-  constructor(private userService: UsersService) {}
+  constructor(private usersService: UsersService) {}
 
   @Post('/signup')
   createUser(@Body() body: CreateUserDto) {
-    this.userService.create(body.email, body.password);
+    this.usersService.create(body.email, body.password);
   }
 
+  @UseInterceptors(SerializeInterceptor)
   @Get('/:id')
-  findUser(@Param('id') id: string) {
-    return this.userService.findOne(parseInt(id));
-  }
-
-  @Get()
-  async findUserByEmail(@Query('email') email: string) {
-    const user = await this.userService.find(email);
+  async findUser(@Param('id') id: string) {
+    console.log('handler is running');
+    const user = await this.usersService.findOne(parseInt(id));
     if (!user) {
       throw new NotFoundException('user not found');
     }
-
     return user;
   }
 
-  @Get('/all')
-  findAllUsers() {
-    return this.userService.findAll();
+  @Get()
+  findAllUsers(@Query('email') email: string) {
+    return this.usersService.find(email);
   }
 
   @Delete('/:id')
   removeUser(@Param('id') id: string) {
-    return this.userService.remove(parseInt(id));
+    return this.usersService.remove(parseInt(id));
   }
 
   @Patch('/:id')
   updateUser(@Param('id') id: string, @Body() body: UpdateUserDto) {
-    return this.userService.update(parseInt(id), body);
+    return this.usersService.update(parseInt(id), body);
   }
 }

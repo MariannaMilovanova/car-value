@@ -9,19 +9,18 @@ export class UsersService {
 
   create(email: string, password: string) {
     const user = this.repo.create({ email, password });
+
     return this.repo.save(user);
   }
 
   findOne(id: number) {
-    return this.repo.findOneBy({ id });
+    // @ts-ignore
+    return this.repo.findOne(id);
   }
 
   find(email: string) {
-    return this.repo.find({ where: { email } });
-  }
-
-  findAll() {
-    return this.repo.find();
+    // @ts-ignore
+    return this.repo.find({ email });
   }
 
   async update(id: number, attrs: Partial<User>) {
@@ -38,6 +37,6 @@ export class UsersService {
     if (!user) {
       throw new NotFoundException('user not found');
     }
-    this.repo.remove(user);
+    return this.repo.remove(user);
   }
 }
